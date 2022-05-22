@@ -751,8 +751,7 @@ ZINIT[EXTENDED_GLOB]=""
     zcompile -U $ZINIT[BIN_DIR]/share/git-process-output.zsh
     # Load for the current session
     [[ $1 != -q ]] && +zinit-message "{pre}[self-update]{rst}:{info} Reloading Zinit for the current session{rst}"
-
-    +zinit-message "{pre}[self-update]{rst}:{info} Resetting the repository ({cmd}${ICE[reset]:-git reset --hard HEAD}{info}){rst}"
+    +zinit-message "{pre}[self-update]{rst}:{info} Resetting the repository {info2}${ICE[reset]:-git reset --hard HEAD}){rst}"
     source $ZINIT[BIN_DIR]/zinit.zsh
     zcompile -U $ZINIT[BIN_DIR]/zinit-{'side','install','autoload'}.zsh
     # Read and remember the new modification timestamps
