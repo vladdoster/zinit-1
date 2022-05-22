@@ -718,21 +718,10 @@ ZINIT[EXTENDED_GLOB]=""
     local -a lines
     (
         builtin cd -q "$ZINIT[BIN_DIR]" \
-        && +zinit-message -n "{pre}[self-update]{rst}:{info} Fetching latest changes from {cmd}$current_branch$nl{rst}" \
+        && +zinit-message -n "{pre}[self-update]{rst}:{info} Fetching latest changes from {cmd}${current_branch}{rst}" \
         && command git fetch --quiet \
-        && lines=( ${(f)"$(command git log --color --date=short --pretty=format:'%Cgreen%cd %h %Creset%s %Cred%d%Creset || %b' ..FETCH_HEAD)"} )
+        && lines=( ${(f)"$(git log --pretty=format:"%C(yellow)%h%Creset %ad | %Cgreen%s%Creset %Cred%d%Creset %Cblue[%an]" --date=short)"} )
         if (( ${#lines} > 0 )); then
-            # Remove the (origin/main ...) segments, to expect only tags to appear
-            lines=( "${(S)lines[@]//\(([,[:blank:]]#(origin|HEAD|master|main)[^a-zA-Z]##(HEAD|origin|master|main)[,[:blank:]]#)#\)/}" )
-            # Remove " ||" if it ends the line (i.e. no additional text from the body)
-            lines=( "${lines[@]/ \|\|[[:blank:]]#(#e)/}" )
-            # If there's no ref-name, 2 consecutive spaces occur - fix this
-            lines=( "${lines[@]/(#b)[[:space:]]#\|\|[[:space:]]#(*)(#e)/|| ${match[1]}}" )
-            lines=( "${lines[@]/(#b)$escape([0-9]##)m[[:space:]]##${escape}m/$escape${match[1]}m${escape}m}" )
-            # Replace what follows "|| ..." with the same thing but with no
-            # newlines, and also only first 10 words (the (w)-flag enables
-            # word-indexing)
-            lines=( "${lines[@]/(#b)[[:blank:]]#\|\|(*)(#e)/| ${${match[1]//$nl/ }[(w)1,(w)10]}}" )
             builtin print -rl -- "${lines[@]}" | .zinit-pager
             builtin print
         fi
