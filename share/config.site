@@ -1,0 +1,4 @@
+# Add directories carrying libs and headers to appropriate vars
+test -z "$CPPFLAGS" && export CPPFLAGS="-I$ZPFX/include $CPPFLAGS"
+test -z "$LDFLAGS" && export LDFLAGS="-L$ZPFX/lib -L$ZPFX/lib64 $LDFLAGS"
+ 
