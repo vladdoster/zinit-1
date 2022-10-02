@@ -3082,14 +3082,34 @@ You can try to prepend {apo}${___q}{lhi}@{apo}'{error} to the ID if the last ice
                     .zinit-ls "$@"
                     ;;
                 (srv)
-                    () { setopt localoptions extendedglob warncreateglobal
-                    [[ ! -e ${ZINIT[SERVICES_DIR]}/"$2".fifo ]] && { builtin print "No such service: $2"; } ||
-                        { [[ $3 = (#i)(next|stop|quit|restart) ]] &&
-                            { builtin print "${(U)3}" >>! ${ZINIT[SERVICES_DIR]}/"$2".fifo || builtin print "Service $2 inactive"; ___retval=1; } ||
-                                { [[ $3 = (#i)start ]] && rm -f ${ZINIT[SERVICES_DIR]}/"$2".stop ||
-                                    { builtin print "Unknown service-command: $3"; ___retval=1; }
-                                }
-                        }
+                    ()
+                    {
+                        setopt localoptions extendedglob warncreateglobal
+                        local base=${ZINIT[SERVICES_DIR]}/"$2"
+                        if [[ ! -e ${ZINIT[SERVICES_DIR]}/"$2".fifo ]]
+                        then
+                            builtin print "No such service: $2"
+                        else
+                            if [[ $3 = (#i)(next|stop|quit|restart) ]]
+                            then
+                                if ! builtin print "${(U)3}" >>! $base.fifo
+                                then
+                                    builtin print "Service $2 inactive"
+                                    ___retval=1
+                                fi
+                            else
+                                if [[ $3 = (#i)start ]]; then
+                                    if [[ -f $base.stop ]]; then
+                                        rm -f $base.stop
+                                    else
+                                        builtin print "Service $2 already started"
+                                    fi
+                                else
+                                    builtin print "Unknown service-command: $3"
+                                    ___retval=1
+                                fi
+                            fi
+                        fi
                     } "$@"
                     ;;
                 (module)
