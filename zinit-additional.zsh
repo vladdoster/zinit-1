@@ -52,7 +52,8 @@
     while (( 1 )); do
         (
             while (( 1 )); do
-                [[ ! -f ${___fle:r}.stop ]] && if (( ___lckd )) || zsystem 2>/dev/null 1>&2 flock -t 1 -f ___fd -e $___fle; then
+              [[ ! -f ${___fle:r}.stop ]] && 
+                if (( ___lckd )) || zsystem 2>/dev/null 1>&2 flock -t 1 -f ___fd -e $___fle; then
                     ___lckd=1
                     if (( ! ___strd )) || [[ $___cmd = RESTART ]]; then
                         [[ $___tpe = p ]] && { ___strd=1
@@ -65,9 +66,11 @@
                     ___cmd=
                     while (( 1 )); do builtin read -t 32767 ___cmd <>"${___fle:r}.fifo" && break; done
                 else
+                    sleep 3
                     return 0
                 fi
 
+                [[ -f ${___fle:r}.stop ]] && { __cmd=; sleep 3;}
                 [[ $___cmd = (#i)NEXT ]] && { kill -TERM "$ZSRV_PID"; builtin read -t 2 ___tmp <>"${___fle:r}.fifo2"; kill -HUP "$ZSRV_PID"; exec {___fd}>&-; ___lckd=0; ___strd=0; builtin read -t 10 ___tmp <>"${___fle:r}.fifo2"; }
                 [[ $___cmd = (#i)STOP ]] && { kill -TERM "$ZSRV_PID"; builtin read -t 2 ___tmp <>"${___fle:r}.fifo2"; kill -HUP "$ZSRV_PID"; ___strd=0; builtin print >! "${___fle:r}.stop"; }
                 [[ $___cmd = (#i)QUIT ]] && { kill -HUP ${sysparams[pid]}; return 1; }
@@ -75,7 +78,7 @@
             done
         ) || break
         builtin read -t 1 ___tmp <>"${___fle:r}.fifo2"
-    done >>! "$ZSRV_WORK_DIR/$ZSRV_ID".log 2>&1
+    done >>| "$ZSRV_WORK_DIR/$ZSRV_ID".log 2>&1
 }
 # ]]]
 # FUNCTION: .zinit-wrap-track-functions [[[
