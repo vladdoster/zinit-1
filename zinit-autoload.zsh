@@ -2670,6 +2670,13 @@ ZINIT[EXTENDED_GLOB]=""
 } # ]]]
 # FUNCTION: .zinit-run-delete-hooks [[[
 .zinit-run-delete-hooks() {
+    # Call make uninstall if it's available
+    local make_path=$5/Makefile
+    [[ -f $make_path ]] && \
+        grep '^uninstall:' $make_path &>/dev/null && \
+        { +zinit-message {pre}Running {cmd}make uninstall{pre}{…}
+            make -C "$make_path:h" uninstall;}
+
     if [[ -n ${ICE[atdelete]} ]]; then
         .zinit-countdown "atdelete" && ( (( ${+ICE[nocd]} == 0 )) && \
                 { builtin cd -q "$5" && eval "${ICE[atdelete]}"; ((1)); } || \
